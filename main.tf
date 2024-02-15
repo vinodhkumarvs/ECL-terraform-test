@@ -7,15 +7,16 @@ resource "aws_elastic_beanstalk_application" "app" {
   description = "EB application demonstrating auto-scaling based on CPU load."
 }
 
-resource "aws_elastic_beanstalk_environment" "env" {
+resource "aws_elastic_beanstalk_environment" "myenv" {
   name                = "${var.application_name}-env"
-  application         = aws_elastic_beanstalk_application.app.name
-  solution_stack_name = "64bit Amazon Linux 2 v3.3.6 running Python 3.8" ## its just random name 
+  application         = aws_elastic_beanstalk_application.myapp.name
+  solution_stack_name = "64bit Amazon Linux 2 v3.3.6 running Python 3.8" # Update as necessary
+  version_label       = aws_elastic_beanstalk_application_version.default.name
 
   setting {
     namespace = "aws:autoscaling:launchconfiguration"
-    name      = "InstanceType"
-    value     = "t2.micro"
+    name      = "IamInstanceProfile"
+    value     = aws_iam_instance_profile.eb_instance_profile.name
   }
 
   setting {
@@ -28,6 +29,55 @@ resource "aws_elastic_beanstalk_environment" "env" {
     namespace = "aws:autoscaling:asg"
     name      = "MaxSize"
     value     = "4"
+  }
+
+  # Auto Scaling triggers based on CPU utilization
+  setting {
+    namespace = "aws:autoscaling:trigger"
+    name      = "UpperThreshold"
+    value     = "80"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:trigger"
+    name      = "LowerThreshold"
+    value     = "30"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:trigger"
+    name      = "MeasureName"
+    value     = "CPUUtilization"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:trigger"
+    name      = "Statistic"
+    value     = "Average"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:trigger"
+    name      = "Unit"
+    value     = "Percent"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:trigger"
+    name      = "Period"
+    value     = "5"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:trigger"
+    name      = "EvaluationPeriods"
+    value     = "1"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:trigger"
+    name      = "BreachDuration"
+    value     = "5"
   }
 
   tags = var.tags

@@ -1,4 +1,4 @@
-# Terraform Elastic Beanstalk Auto-Scaling Example
+# Terraform Elastic Beanstalk Auto-Scaling Example For ECL (as asked )
 
 This Terraform project deploys an AWS Elastic Beanstalk application with auto-scaling based on CPU utilization.
 
